@@ -36,6 +36,9 @@ build/
 *.db
 *.sqlite
 
+### Uploads ###
+uploads/
+
 ### Vibe Coding ###
 CLAUDE.md
 AGENTS.md
