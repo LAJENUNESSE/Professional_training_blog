@@ -122,7 +122,9 @@
       }
       router.push('/articles')
     } catch (err) {
-      message.error('保存失败')
+      const errorMsg = err instanceof Error ? err.message : '保存失败'
+      message.error(errorMsg)
+      console.error('Save article error:', err)
     } finally {
       saving.value = false
     }
@@ -156,10 +158,10 @@
       </NSpace>
     </div>
 
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
       <!-- Main Content -->
-      <div class="col-span-3 space-y-4">
-        <NCard>
+      <div class="lg:col-span-3 space-y-4">
+        <NCard class="h-full">
           <NForm :model="formValue" label-placement="top">
             <NFormItem label="标题" required>
               <NInput v-model:value="formValue.title" placeholder="请输入文章标题" />
@@ -169,6 +171,7 @@
                 :value="formValue.content"
                 :plugins="plugins"
                 :upload-images="handleUploadImages"
+                :style="{ minHeight: '70vh' }"
                 @change="(v: string) => (formValue.content = v)"
               />
             </NFormItem>
@@ -177,8 +180,8 @@
       </div>
 
       <!-- Sidebar -->
-      <div class="col-span-1 space-y-4">
-        <NCard title="发布设置">
+      <div class="lg:col-span-1 space-y-4">
+        <NCard title="发布设置" class="sticky top-4">
           <NForm :model="formValue" label-placement="top" size="small">
             <NFormItem label="状态">
               <NSelect v-model:value="formValue.status" :options="statusOptions" />

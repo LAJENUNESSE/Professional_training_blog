@@ -1,5 +1,12 @@
 import request from './request'
-import type { Result, PageResult, PageParams, ArticleDTO, ArticleRequest } from '../types'
+import type {
+  Result,
+  PageResult,
+  PageParams,
+  ArticleDTO,
+  ArticleRequest,
+  ArticleLikeResponse,
+} from '../types'
 
 export const articleApi = {
   // 公开接口
@@ -21,11 +28,11 @@ export const articleApi = {
       params: { keyword, ...params },
     }),
 
-  like: (id: number) => request.post<Result<void>>(`/api/articles/${id}/like`),
+  like: (id: number) => request.post<Result<ArticleLikeResponse>>(`/api/articles/${id}/like`),
 
   // 管理接口
   admin: {
-    getAll: (params?: PageParams & { status?: string }) =>
+    getAll: (params?: PageParams & { status?: string; categoryId?: number; tagId?: number }) =>
       request.get<Result<PageResult<ArticleDTO>>>('/api/admin/articles', { params }),
 
     getById: (id: number) => request.get<Result<ArticleDTO>>(`/api/admin/articles/${id}`),

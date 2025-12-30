@@ -3,11 +3,13 @@ package com.example.blog.service;
 import com.example.blog.dto.request.ArticleRequest;
 import com.example.blog.dto.response.ArticleDTO;
 import com.example.blog.entity.Article;
+import com.example.blog.entity.ArticleLike;
 import com.example.blog.entity.Category;
 import com.example.blog.entity.Tag;
 import com.example.blog.entity.User;
 import com.example.blog.exception.BusinessException;
 import com.example.blog.repository.ArticleRepository;
+import com.example.blog.repository.ArticleLikeRepository;
 import com.example.blog.repository.CategoryRepository;
 import com.example.blog.repository.TagRepository;
 import com.example.blog.repository.UserRepository;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -26,6 +29,7 @@ import java.util.Set;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final ArticleLikeRepository articleLikeRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
@@ -49,10 +53,22 @@ public class ArticleService {
         return articleRepository.findByCategory(category, pageable).map(ArticleDTO::fromEntityList);
     }
 
+    public Page<ArticleDTO> getArticlesByCategory(Long categoryId, Article.Status status, Pageable pageable) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> BusinessException.notFound("Category not found"));
+        return articleRepository.findByCategoryAndStatus(category, status, pageable).map(ArticleDTO::fromEntityList);
+    }
+
     public Page<ArticleDTO> getArticlesByTag(Long tagId, Pageable pageable) {
         Tag tag = tagRepository.findById(tagId)
                 .orElseThrow(() -> BusinessException.notFound("Tag not found"));
         return articleRepository.findByTagsContaining(tag, pageable).map(ArticleDTO::fromEntityList);
+    }
+
+    public Page<ArticleDTO> getArticlesByTag(Long tagId, Article.Status status, Pageable pageable) {
+        Tag tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> BusinessException.notFound("Tag not found"));
+        return articleRepository.findByTagsContainingAndStatus(tag, status, pageable).map(ArticleDTO::fromEntityList);
     }
 
     public Page<ArticleDTO> searchArticles(String keyword, Pageable pageable) {
@@ -61,16 +77,28 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public ArticleDTO getArticleById(Long id) {
+        return getArticleById(id, null);
+    }
+
+    @Transactional(readOnly = true)
+    public ArticleDTO getArticleById(Long id, String username) {
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Article not found"));
-        return ArticleDTO.fromEntity(article);
+        Boolean liked = resolveLiked(article, username);
+        return ArticleDTO.fromEntity(article, liked);
     }
 
     @Transactional(readOnly = true)
     public ArticleDTO getArticleBySlug(String slug) {
+        return getArticleBySlug(slug, null);
+    }
+
+    @Transactional(readOnly = true)
+    public ArticleDTO getArticleBySlug(String slug, String username) {
         Article article = articleRepository.findBySlug(slug)
                 .orElseThrow(() -> BusinessException.notFound("Article not found"));
-        return ArticleDTO.fromEntity(article);
+        Boolean liked = resolveLiked(article, username);
+        return ArticleDTO.fromEntity(article, liked);
     }
 
     @Transactional
@@ -174,8 +202,39 @@ public class ArticleService {
     }
 
     @Transactional
-    public void incrementLikeCount(Long id) {
-        articleRepository.incrementLikeCount(id);
+    public LikeResult toggleLike(Long id, String username) {
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> BusinessException.notFound("Article not found"));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> BusinessException.notFound("User not found"));
+
+        Optional<ArticleLike> existing = articleLikeRepository.findByArticleAndUser(article, user);
+        boolean liked;
+        if (existing.isPresent()) {
+            articleLikeRepository.delete(existing.get());
+            article.setLikeCount(Math.max(0, article.getLikeCount() - 1));
+            liked = false;
+        } else {
+            ArticleLike articleLike = new ArticleLike();
+            articleLike.setArticle(article);
+            articleLike.setUser(user);
+            articleLikeRepository.save(articleLike);
+            article.setLikeCount(article.getLikeCount() + 1);
+            liked = true;
+        }
+        articleRepository.save(article);
+        return new LikeResult(article.getLikeCount(), liked);
+    }
+
+    private Boolean resolveLiked(Article article, String username) {
+        if (username == null) {
+            return null;
+        }
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return null;
+        }
+        return articleLikeRepository.existsByArticleAndUser(article, user);
     }
 
     private String generateSlug(String title) {
@@ -186,4 +245,6 @@ public class ArticleService {
         }
         return slug;
     }
+
+    public record LikeResult(int likeCount, boolean liked) {}
 }

@@ -19,6 +19,7 @@ export interface ArticleDTO {
   allowComment: boolean
   viewCount: number
   likeCount: number
+  liked?: boolean | null
   publishedAt: string | null
   author: AuthorInfo
   category: import('./category').CategoryDTO | null
@@ -39,4 +40,9 @@ export interface ArticleRequest {
   allowComment?: boolean
   categoryId?: number
   tagIds?: number[]
+}
+
+export interface ArticleLikeResponse {
+  likeCount: number
+  liked: boolean
 }

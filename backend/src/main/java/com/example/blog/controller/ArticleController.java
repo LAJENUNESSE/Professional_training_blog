@@ -4,8 +4,10 @@ import com.example.blog.common.PageResult;
 import com.example.blog.common.Result;
 import com.example.blog.dto.response.ArticleDTO;
 import com.example.blog.entity.Article;
+import com.example.blog.exception.BusinessException;
 import com.example.blog.service.ArticleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,8 +29,9 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public Result<ArticleDTO> getArticleById(@PathVariable Long id) {
-        ArticleDTO article = articleService.getArticleById(id);
+    public Result<ArticleDTO> getArticleById(@PathVariable Long id, Authentication authentication) {
+        String username = authentication != null ? authentication.getName() : null;
+        ArticleDTO article = articleService.getArticleById(id, username);
         if (article.getStatus().equals(Article.Status.PUBLISHED.name())) {
             articleService.incrementViewCount(id);
         }
@@ -36,8 +39,9 @@ public class ArticleController {
     }
 
     @GetMapping("/slug/{slug}")
-    public Result<ArticleDTO> getArticleBySlug(@PathVariable String slug) {
-        ArticleDTO article = articleService.getArticleBySlug(slug);
+    public Result<ArticleDTO> getArticleBySlug(@PathVariable String slug, Authentication authentication) {
+        String username = authentication != null ? authentication.getName() : null;
+        ArticleDTO article = articleService.getArticleBySlug(slug, username);
         if (article.getStatus().equals(Article.Status.PUBLISHED.name())) {
             articleService.incrementViewCount(article.getId());
         }
@@ -72,8 +76,11 @@ public class ArticleController {
     }
 
     @PostMapping("/{id}/like")
-    public Result<Void> likeArticle(@PathVariable Long id) {
-        articleService.incrementLikeCount(id);
-        return Result.success();
+    public Result<ArticleService.LikeResult> likeArticle(@PathVariable Long id, Authentication authentication) {
+        String username = authentication != null ? authentication.getName() : null;
+        if (username == null) {
+            throw BusinessException.unauthorized("Unauthorized");
+        }
+        return Result.success(articleService.toggleLike(id, username));
     }
 }

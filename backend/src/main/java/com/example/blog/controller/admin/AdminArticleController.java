@@ -25,10 +25,28 @@ public class AdminArticleController {
     public Result<PageResult<ArticleDTO>> getAllArticles(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long tagId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        if (status != null && !status.isEmpty()) {
-            return Result.success(PageResult.of(articleService.getArticlesByStatus(Article.Status.valueOf(status), pageable)));
+        Article.Status parsedStatus = status != null && !status.isEmpty() ? Article.Status.valueOf(status) : null;
+
+        if (categoryId != null) {
+            if (parsedStatus != null) {
+                return Result.success(PageResult.of(articleService.getArticlesByCategory(categoryId, parsedStatus, pageable)));
+            }
+            return Result.success(PageResult.of(articleService.getArticlesByCategory(categoryId, pageable)));
+        }
+
+        if (tagId != null) {
+            if (parsedStatus != null) {
+                return Result.success(PageResult.of(articleService.getArticlesByTag(tagId, parsedStatus, pageable)));
+            }
+            return Result.success(PageResult.of(articleService.getArticlesByTag(tagId, pageable)));
+        }
+
+        if (parsedStatus != null) {
+            return Result.success(PageResult.of(articleService.getArticlesByStatus(parsedStatus, pageable)));
         }
         return Result.success(PageResult.of(articleService.getAllArticles(pageable)));
     }

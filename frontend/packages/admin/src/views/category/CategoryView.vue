@@ -15,7 +15,9 @@
   } from 'naive-ui'
   import type { DataTableColumns } from 'naive-ui'
   import { categoryApi, type CategoryDTO, type CategoryRequest, formatDate } from '@blog/shared'
+  import { useRouter } from 'vue-router'
 
+  const router = useRouter()
   const message = useMessage()
   const loading = ref(false)
   const categories = ref<CategoryDTO[]>([])
@@ -46,9 +48,14 @@
     {
       title: '操作',
       key: 'actions',
-      width: 150,
+      width: 200,
       render: (row) =>
         h(NSpace, null, () => [
+          h(
+            NButton,
+            { size: 'small', tertiary: true, onClick: () => handleViewArticles(row.id) },
+            () => '查看文章'
+          ),
           h(NButton, { size: 'small', onClick: () => handleEdit(row) }, () => '编辑'),
           h(
             NPopconfirm,
@@ -123,6 +130,10 @@
     } catch (err) {
       message.error('删除失败')
     }
+  }
+
+  function handleViewArticles(id: number) {
+    router.push({ path: '/articles', query: { categoryId: id } })
   }
 
   onMounted(loadData)

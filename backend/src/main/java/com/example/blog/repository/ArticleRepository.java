@@ -25,7 +25,11 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     Page<Article> findByCategory(Category category, Pageable pageable);
 
+    Page<Article> findByCategoryAndStatus(Category category, Article.Status status, Pageable pageable);
+
     Page<Article> findByTagsContaining(Tag tag, Pageable pageable);
+
+    Page<Article> findByTagsContainingAndStatus(Tag tag, Article.Status status, Pageable pageable);
 
     @Query("SELECT a FROM Article a WHERE a.status = :status ORDER BY a.isTop DESC, a.publishedAt DESC")
     Page<Article> findPublishedArticles(@Param("status") Article.Status status, Pageable pageable);

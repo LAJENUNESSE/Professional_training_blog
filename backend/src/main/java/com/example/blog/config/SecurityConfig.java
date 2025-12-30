@@ -60,7 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/comments").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/comments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/settings/**").permitAll()
                         // Uploads
                         .requestMatchers("/uploads/**").permitAll()

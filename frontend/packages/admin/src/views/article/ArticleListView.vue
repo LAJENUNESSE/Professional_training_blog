@@ -1,6 +1,6 @@
 <script setup lang="ts">
-  import { ref, onMounted, h } from 'vue'
-  import { useRouter } from 'vue-router'
+  import { ref, onMounted, h, watch, computed } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
   import {
     NCard,
     NDataTable,
@@ -14,6 +14,7 @@
   import { articleApi, type ArticleDTO, type PageResult, formatDate, ARTICLE_STATUS } from '@blog/shared'
 
   const router = useRouter()
+  const route = useRoute()
   const message = useMessage()
   const loading = ref(false)
   const articles = ref<ArticleDTO[]>([])
@@ -23,6 +24,21 @@
     itemCount: 0,
     showSizePicker: true,
     pageSizes: [10, 20, 50],
+  })
+
+  const filterCategoryId = ref<number | null>(
+    route.query.categoryId ? Number(route.query.categoryId) : null
+  )
+  const filterTagId = ref<number | null>(route.query.tagId ? Number(route.query.tagId) : null)
+
+  const filterText = computed(() => {
+    if (filterCategoryId.value) {
+      return `分类ID: ${filterCategoryId.value}`
+    }
+    if (filterTagId.value) {
+      return `标签ID: ${filterTagId.value}`
+    }
+    return ''
   })
 
   const columns: DataTableColumns<ArticleDTO> = [
@@ -91,6 +107,8 @@
       const res = (await articleApi.admin.getAll({
         page: pagination.value.page - 1,
         size: pagination.value.pageSize,
+        categoryId: filterCategoryId.value ?? undefined,
+        tagId: filterTagId.value ?? undefined,
       })) as unknown as { data: PageResult<ArticleDTO> }
       articles.value = res.data.content
       pagination.value.itemCount = res.data.totalElements
@@ -112,6 +130,13 @@
     loadData()
   }
 
+  function clearFilter() {
+    filterCategoryId.value = null
+    filterTagId.value = null
+    router.replace({ path: '/articles', query: {} })
+    loadData()
+  }
+
   async function handleDelete(id: number) {
     try {
       await articleApi.admin.delete(id)
@@ -123,6 +148,15 @@
   }
 
   onMounted(loadData)
+
+  watch(
+    () => route.query,
+    (q) => {
+      filterCategoryId.value = q.categoryId ? Number(q.categoryId) : null
+      filterTagId.value = q.tagId ? Number(q.tagId) : null
+      loadData()
+    }
+  )
 </script>
 
 <template>
@@ -132,6 +166,11 @@
       <NButton type="primary" @click="router.push('/articles/new')">
         新建文章
       </NButton>
+    </div>
+
+    <div v-if="filterText" class="flex items-center gap-3 text-sm text-gray-600">
+      <span>当前筛选：{{ filterText }}</span>
+      <NButton secondary size="small" @click="clearFilter">清除</NButton>
     </div>
 
     <NCard>

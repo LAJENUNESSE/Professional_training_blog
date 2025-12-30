@@ -23,6 +23,7 @@ public class ArticleDTO {
     private Boolean allowComment;
     private Integer viewCount;
     private Integer likeCount;
+    private Boolean liked;
     private LocalDateTime publishedAt;
     private AuthorInfo author;
     private CategoryDTO category;
@@ -53,6 +54,7 @@ public class ArticleDTO {
                 .allowComment(article.getAllowComment())
                 .viewCount(article.getViewCount())
                 .likeCount(article.getLikeCount())
+                .liked(null)
                 .publishedAt(article.getPublishedAt())
                 .commentCount((long) article.getComments().size())
                 .createdAt(article.getCreatedAt())
@@ -80,17 +82,20 @@ public class ArticleDTO {
         return builder.build();
     }
 
-    public static ArticleDTO fromEntityList(Article article) {
+    public static ArticleDTO fromEntity(Article article, Boolean liked) {
         ArticleDTOBuilder builder = ArticleDTO.builder()
                 .id(article.getId())
                 .title(article.getTitle())
                 .slug(article.getSlug())
                 .summary(article.getSummary())
+                .content(article.getContent())
                 .coverImage(article.getCoverImage())
                 .status(article.getStatus().name())
                 .isTop(article.getIsTop())
+                .allowComment(article.getAllowComment())
                 .viewCount(article.getViewCount())
                 .likeCount(article.getLikeCount())
+                .liked(liked)
                 .publishedAt(article.getPublishedAt())
                 .createdAt(article.getCreatedAt());
 
@@ -114,5 +119,9 @@ public class ArticleDTO {
         }
 
         return builder.build();
+    }
+
+    public static ArticleDTO fromEntityList(Article article) {
+        return fromEntity(article, null);
     }
 }
