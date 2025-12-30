@@ -179,6 +179,11 @@ public class ArticleService {
     }
 
     private String generateSlug(String title) {
-        return title.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        String slug = title.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+        // 如果标题是纯中文或特殊字符，slug会为空，此时使用时间戳
+        if (slug.isEmpty()) {
+            slug = "article-" + System.currentTimeMillis();
+        }
+        return slug;
     }
 }

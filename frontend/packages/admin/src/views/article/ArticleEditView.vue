@@ -106,6 +106,11 @@
       return
     }
 
+    if (formValue.value.status === 'PUBLISHED' && !formValue.value.slug?.trim()) {
+      message.warning('发布文章时必须填写 Slug')
+      return
+    }
+
     saving.value = true
     try {
       if (isEdit.value) {
@@ -205,8 +210,8 @@
 
         <NCard title="SEO 设置">
           <NForm :model="formValue" label-placement="top" size="small">
-            <NFormItem label="Slug">
-              <NInput v-model:value="formValue.slug" placeholder="URL 别名" />
+            <NFormItem label="Slug" :required="formValue.status === 'PUBLISHED'">
+              <NInput v-model:value="formValue.slug" placeholder="URL 别名（发布时必填）" />
             </NFormItem>
             <NFormItem label="摘要">
               <NInput

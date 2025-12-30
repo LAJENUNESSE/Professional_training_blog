@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="037afe65-23a8-40a3-924f-21a09c0ab3b1" name="更改" comment="feat: 博客系统后端初始化&#10;   - Spring Boot 4.0.1 + JWT认证&#10;   - SQLite数据库 + Flyway迁移&#10;   - 文章、分类、标签、评论的RESTful API&#10;   - 管理后台API与RBAC权限控制&#10;   - JPA实体类与审计功能&#10;   - 全局异常处理与统一响应格式" />
+    <list default="true" id="037afe65-23a8-40a3-924f-21a09c0ab3b1" name="更改" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/example/blog/service/ArticleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/example/blog/service/ArticleService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/packages/admin/src/views/article/ArticleEditView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/packages/admin/src/views/article/ArticleEditView.vue" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -26,6 +30,9 @@
       </MavenGeneralSettings>
     </option>
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -43,9 +50,10 @@
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;//wsl.localhost/Ubuntu-24.04/home/lajenunesse/projects/java/blog&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/lajenunesse/projects/java/blog/backend/pom.xml&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;swagger&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/home/lajenunesse/projects/java/blog/frontend/node_modules/typescript/lib&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
   &quot;keyToStringList&quot;: {
@@ -67,26 +75,31 @@
       <window_info id="Pull Requests" order="4" weight="0.23776042" />
       <window_info anchor="bottom" id="TypeScript" />
       <window_info anchor="bottom" id="File Transfer" />
-      <window_info anchor="bottom" id="Version Control" order="1" weight="0.46656978" />
+      <window_info anchor="bottom" id="Version Control" order="1" weight="0.5188954" />
       <window_info anchor="bottom" id="Problems" order="2" />
-      <window_info anchor="bottom" id="Problems View" order="3" weight="0.46656978" />
+      <window_info anchor="bottom" id="Problems View" order="3" weight="0.5188954" />
       <window_info anchor="bottom" id="Services" order="5" weight="0.46656978" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="6" visible="true" weight="0.7805233" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="6" visible="true" weight="0.49370155" />
       <window_info anchor="bottom" id="Profiler" order="7" weight="0.46656978" />
       <window_info anchor="bottom" id="TODO" order="8" weight="0.46656978" />
       <window_info anchor="bottom" id="Database Changes" order="9" weight="0.46656978" />
-      <window_info anchor="bottom" id="Build" order="10" weight="0.46656978" />
+      <window_info anchor="bottom" id="Build" order="10" weight="0.8764535" />
       <window_info anchor="bottom" id="Find" order="11" weight="0.32994187" />
       <window_info anchor="right" id="Code Provenance" side_tool="true" />
       <window_info anchor="right" id="Notifications" order="0" weight="0.23411459" />
       <window_info anchor="right" id="AIAssistant" order="1" weight="0.25" />
       <window_info anchor="right" id="Database" order="2" weight="0.23411459" />
       <window_info anchor="right" id="Gradle" order="3" weight="0.25" />
-      <window_info active="true" anchor="right" id="Maven" order="4" visible="true" weight="0.23411459" />
+      <window_info anchor="right" id="Maven" order="4" weight="0.23411459" />
       <window_info anchor="right" id="Endpoints" order="5" sideWeight="0.50051975" weight="0.23411459" />
       <window_info anchor="right" id="Beans" order="6" sideWeight="0.50051975" weight="0.23411459" />
       <window_info anchor="right" id="Coverage" order="7" sideWeight="0.49948025" side_tool="true" weight="0.23411459" />
     </layout>
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="BlogApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
@@ -125,18 +138,96 @@
       <option name="project" value="LOCAL" />
       <updated>1766991091475</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="更新wordspace文件">
+      <option name="closed" value="true" />
+      <created>1767005772576</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1767005772576</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+    <option name="exactExcludedFiles">
+      <list>
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/composables/useAuth.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/composables/usePagination.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/composables/index.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/composables/useAuth.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/composables/usePagination.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/composables/index.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/index.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/index.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/category.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/comment.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/article.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/comment.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/category.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/user.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/request.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/auth.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/index.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/user.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/tag.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/index.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/upload.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/article.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/setting.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/setting.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/upload.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/auth.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/tag.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/api/request.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/category.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/comment.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/article.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/comment.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/category.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/auth.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/index.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/tag.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/index.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/upload.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/api.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/api.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/article.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/setting.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/setting.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/upload.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/auth.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/types/tag.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/utils/date.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/utils/index.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/utils/date.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/utils/storage.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/utils/index.d.ts.map" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/utils/storage.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/constants/index.d.ts" />
+        <option value="$PROJECT_DIR$/frontend/packages/shared/src/constants/index.d.ts.map" />
+      </list>
+    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -144,7 +235,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="feat: 博客系统后端初始化&#10;   - Spring Boot 4.0.1 + JWT认证&#10;   - SQLite数据库 + Flyway迁移&#10;   - 文章、分类、标签、评论的RESTful API&#10;   - 管理后台API与RBAC权限控制&#10;   - JPA实体类与审计功能&#10;   - 全局异常处理与统一响应格式" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: 博客系统后端初始化&#10;   - Spring Boot 4.0.1 + JWT认证&#10;   - SQLite数据库 + Flyway迁移&#10;   - 文章、分类、标签、评论的RESTful API&#10;   - 管理后台API与RBAC权限控制&#10;   - JPA实体类与审计功能&#10;   - 全局异常处理与统一响应格式" />
+    <MESSAGE value="更新wordspace文件" />
+    <option name="LAST_COMMIT_MESSAGE" value="更新wordspace文件" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
