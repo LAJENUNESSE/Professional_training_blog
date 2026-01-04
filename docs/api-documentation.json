@@ -1,0 +1,1023 @@
+{
+  "api": {
+    "name": "Blog System API",
+    "version": "1.0.0",
+    "description": "Spring Boot Blog System REST API with JWT Authentication",
+    "baseURL": "http://localhost:8080",
+    "responseFormat": {
+      "success": {
+        "code": 200,
+        "message": "success",
+        "data": "<response_data>"
+      },
+      "error": {
+        "code": "HTTP_STATUS_CODE",
+        "message": "error_description",
+        "data": null
+      }
+    },
+    "pagination": {
+      "format": "PageResult<T>",
+      "fields": {
+        "content": "array<T>",
+        "pageNumber": "current page number (0-indexed)",
+        "pageSize": "items per page",
+        "totalElements": "total item count",
+        "totalPages": "total page count",
+        "first": "is first page",
+        "last": "is last page"
+      }
+    }
+  },
+  "authentication": {
+    "method": "JWT Bearer Token",
+    "tokenType": "Bearer",
+    "defaultCredentials": {
+      "admin": {
+        "username": "admin",
+        "password": "admin123"
+      }
+    },
+    "tokenExpiration": {
+      "accessToken": "1 hour",
+      "refreshToken": "7 days"
+    }
+  },
+  "security": {
+    "public": [
+      "/api/auth/**",
+      "GET /api/articles/**",
+      "GET /api/categories/**",
+      "GET /api/tags/**",
+      "GET/POST /api/comments/**",
+      "GET /api/settings/**",
+      "/uploads/**"
+    ],
+    "authenticated": [
+      "POST /api/articles/{id}/like"
+    ],
+    "adminOnly": [
+      "/api/admin/**"
+    ]
+  },
+  "endpoints": {
+    "public": [
+      {
+        "path": "/api/auth/register",
+        "method": "POST",
+        "description": "Register new user",
+        "authentication": "None",
+        "request": {
+          "contentType": "application/json",
+          "body": {
+            "username": "string (3-50 chars, required)",
+            "password": "string (6-100 chars, required)",
+            "email": "string (valid email, required)",
+            "nickname": "string (max 50 chars, optional)"
+          }
+        },
+        "response": {
+          "data": {
+            "accessToken": "string",
+            "refreshToken": "string",
+            "tokenType": "Bearer",
+            "expiresIn": "number (seconds)",
+            "user": {
+              "id": "number",
+              "username": "string",
+              "email": "string",
+              "nickname": "string",
+              "avatar": "string",
+              "role": "ADMIN | USER"
+            }
+          }
+        }
+      },
+      {
+        "path": "/api/auth/login",
+        "method": "POST",
+        "description": "User login",
+        "authentication": "None",
+        "request": {
+          "contentType": "application/json",
+          "body": {
+            "username": "string (required)",
+            "password": "string (required)"
+          }
+        },
+        "response": {
+          "data": {
+            "accessToken": "string",
+            "refreshToken": "string",
+            "tokenType": "Bearer",
+            "expiresIn": "number (seconds)",
+            "user": {
+              "id": "number",
+              "username": "string",
+              "email": "string",
+              "nickname": "string",
+              "avatar": "string",
+              "role": "ADMIN | USER"
+            }
+          }
+        }
+      },
+      {
+        "path": "/api/auth/refresh",
+        "method": "POST",
+        "description": "Refresh JWT token",
+        "authentication": "None",
+        "request": {
+          "query": {
+            "refreshToken": "string (required)"
+          }
+        },
+        "response": {
+          "data": {
+            "accessToken": "string",
+            "refreshToken": "string",
+            "tokenType": "Bearer",
+            "expiresIn": "number (seconds)",
+            "user": {
+              "id": "number",
+              "username": "string",
+              "email": "string",
+              "nickname": "string",
+              "avatar": "string",
+              "role": "ADMIN | USER"
+            }
+          }
+        }
+      },
+      {
+        "path": "/api/articles",
+        "method": "GET",
+        "description": "Get published articles (paginated)",
+        "authentication": "None",
+        "request": {
+          "query": {
+            "page": "number (default: 0)",
+            "size": "number (default: 10)"
+          }
+        },
+        "response": {
+          "data": "PageResult<ArticleDTO>"
+        }
+      },
+      {
+        "path": "/api/articles/{id}",
+        "method": "GET",
+        "description": "Get article by ID",
+        "authentication": "Optional (for liked status)",
+        "request": {
+          "path": {
+            "id": "number (article ID)"
+          }
+        },
+        "response": {
+          "data": "ArticleDTO"
+        }
+      },
+      {
+        "path": "/api/articles/slug/{slug}",
+        "method": "GET",
+        "description": "Get article by slug",
+        "authentication": "Optional (for liked status)",
+        "request": {
+          "path": {
+            "slug": "string (article slug)"
+          }
+        },
+        "response": {
+          "data": "ArticleDTO"
+        }
+      },
+      {
+        "path": "/api/articles/category/{categoryId}",
+        "method": "GET",
+        "description": "Get articles by category (paginated)",
+        "authentication": "None",
+        "request": {
+          "path": {
+            "categoryId": "number"
+          },
+          "query": {
+            "page": "number (default: 0)",
+            "size": "number (default: 10)"
+          }
+        },
+        "response": {
+          "data": "PageResult<ArticleDTO>"
+        }
+      },
+      {
+        "path": "/api/articles/tag/{tagId}",
+        "method": "GET",
+        "description": "Get articles by tag (paginated)",
+        "authentication": "None",
+        "request": {
+          "path": {
+            "tagId": "number"
+          },
+          "query": {
+            "page": "number (default: 0)",
+            "size": "number (default: 10)"
+          }
+        },
+        "response": {
+          "data": "PageResult<ArticleDTO>"
+        }
+      },
+      {
+        "path": "/api/articles/search",
+        "method": "GET",
+        "description": "Search articles (paginated)",
+        "authentication": "None",
+        "request": {
+          "query": {
+            "keyword": "string (required)",
+            "page": "number (default: 0)",
+            "size": "number (default: 10)"
+          }
+        },
+        "response": {
+          "data": "PageResult<ArticleDTO>"
+        }
+      },
+      {
+        "path": "/api/articles/{id}/like",
+        "method": "POST",
+        "description": "Toggle article like",
+        "authentication": "Required",
+        "request": {
+          "path": {
+            "id": "number (article ID)"
+          },
+          "headers": {
+            "Authorization": "Bearer <access_token>"
+          }
+        },
+        "response": {
+          "data": {
+            "liked": "boolean",
+            "likeCount": "number"
+          }
+        }
+      },
+      {
+        "path": "/api/categories",
+        "method": "GET",
+        "description": "Get all categories",
+        "authentication": "None",
+        "request": {},
+        "response": {
+          "data": "CategoryDTO[]"
+        }
+      },
+      {
+        "path": "/api/categories/{id}",
+        "method": "GET",
+        "description": "Get category by ID",
+        "authentication": "None",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "CategoryDTO"
+        }
+      },
+      {
+        "path": "/api/categories/slug/{slug}",
+        "method": "GET",
+        "description": "Get category by slug",
+        "authentication": "None",
+        "request": {
+          "path": {
+            "slug": "string"
+          }
+        },
+        "response": {
+          "data": "CategoryDTO"
+        }
+      },
+      {
+        "path": "/api/tags",
+        "method": "GET",
+        "description": "Get all tags",
+        "authentication": "None",
+        "request": {},
+        "response": {
+          "data": "TagDTO[]"
+        }
+      },
+      {
+        "path": "/api/tags/{id}",
+        "method": "GET",
+        "description": "Get tag by ID",
+        "authentication": "None",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "TagDTO"
+        }
+      },
+      {
+        "path": "/api/tags/slug/{slug}",
+        "method": "GET",
+        "description": "Get tag by slug",
+        "authentication": "None",
+        "request": {
+          "path": {
+            "slug": "string"
+          }
+        },
+        "response": {
+          "data": "TagDTO"
+        }
+      },
+      {
+        "path": "/api/comments/article/{articleId}",
+        "method": "GET",
+        "description": "Get approved comments for article",
+        "authentication": "None",
+        "request": {
+          "path": {
+            "articleId": "number"
+          }
+        },
+        "response": {
+          "data": "CommentDTO[]"
+        }
+      },
+      {
+        "path": "/api/comments/article/{articleId}",
+        "method": "POST",
+        "description": "Create comment",
+        "authentication": "Optional (for logged-in users)",
+        "request": {
+          "path": {
+            "articleId": "number"
+          },
+          "contentType": "application/json",
+          "body": {
+            "content": "string (required)",
+            "authorName": "string (max 50 chars, optional)",
+            "authorEmail": "string (valid email, optional)",
+            "authorUrl": "string (max 255 chars, optional)",
+            "parentId": "number (optional, for replies)"
+          }
+        },
+        "response": {
+          "data": "CommentDTO"
+        }
+      },
+      {
+        "path": "/api/settings",
+        "method": "GET",
+        "description": "Get all settings",
+        "authentication": "None",
+        "request": {},
+        "response": {
+          "data": "Map<string, string>"
+        }
+      },
+      {
+        "path": "/api/settings/{key}",
+        "method": "GET",
+        "description": "Get setting by key",
+        "authentication": "None",
+        "request": {
+          "path": {
+            "key": "string"
+          }
+        },
+        "response": {
+          "data": "string"
+        }
+      }
+    ],
+    "admin": [
+      {
+        "path": "/api/admin/articles",
+        "method": "GET",
+        "description": "Get all articles (with filters, paginated)",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "query": {
+            "page": "number (default: 0)",
+            "size": "number (default: 10)",
+            "status": "DRAFT | PUBLISHED | ARCHIVED (optional)",
+            "categoryId": "number (optional)",
+            "tagId": "number (optional)"
+          }
+        },
+        "response": {
+          "data": "PageResult<ArticleDTO>"
+        }
+      },
+      {
+        "path": "/api/admin/articles/{id}",
+        "method": "GET",
+        "description": "Get article by ID (admin)",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "ArticleDTO"
+        }
+      },
+      {
+        "path": "/api/admin/articles",
+        "method": "POST",
+        "description": "Create article",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "contentType": "application/json",
+          "body": {
+            "title": "string (1-200 chars, required)",
+            "slug": "string (max 255 chars, optional)",
+            "summary": "string (optional)",
+            "content": "string (required)",
+            "coverImage": "string (max 255 chars, optional)",
+            "status": "DRAFT | PUBLISHED | ARCHIVED (default: DRAFT)",
+            "isTop": "boolean (default: false)",
+            "allowComment": "boolean (default: true)",
+            "categoryId": "number (optional)",
+            "tagIds": "number[] (optional)"
+          }
+        },
+        "response": {
+          "data": "ArticleDTO"
+        }
+      },
+      {
+        "path": "/api/admin/articles/{id}",
+        "method": "PUT",
+        "description": "Update article",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          },
+          "contentType": "application/json",
+          "body": {
+            "title": "string (1-200 chars, required)",
+            "slug": "string (max 255 chars, optional)",
+            "summary": "string (optional)",
+            "content": "string (required)",
+            "coverImage": "string (max 255 chars, optional)",
+            "status": "DRAFT | PUBLISHED | ARCHIVED",
+            "isTop": "boolean",
+            "allowComment": "boolean",
+            "categoryId": "number (optional)",
+            "tagIds": "number[] (optional)"
+          }
+        },
+        "response": {
+          "data": "ArticleDTO"
+        }
+      },
+      {
+        "path": "/api/admin/articles/{id}",
+        "method": "DELETE",
+        "description": "Delete article",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "null"
+        }
+      },
+      {
+        "path": "/api/admin/categories",
+        "method": "GET",
+        "description": "Get all categories (admin)",
+        "authentication": "Required (ADMIN role)",
+        "request": {},
+        "response": {
+          "data": "CategoryDTO[]"
+        }
+      },
+      {
+        "path": "/api/admin/categories/{id}",
+        "method": "GET",
+        "description": "Get category by ID (admin)",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "CategoryDTO"
+        }
+      },
+      {
+        "path": "/api/admin/categories",
+        "method": "POST",
+        "description": "Create category",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "contentType": "application/json",
+          "body": {
+            "name": "string (1-50 chars, required)",
+            "slug": "string (max 100 chars, optional)",
+            "description": "string (max 255 chars, optional)",
+            "sortOrder": "number (default: 0)"
+          }
+        },
+        "response": {
+          "data": "CategoryDTO"
+        }
+      },
+      {
+        "path": "/api/admin/categories/{id}",
+        "method": "PUT",
+        "description": "Update category",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          },
+          "contentType": "application/json",
+          "body": {
+            "name": "string (1-50 chars, required)",
+            "slug": "string (max 100 chars, optional)",
+            "description": "string (max 255 chars, optional)",
+            "sortOrder": "number"
+          }
+        },
+        "response": {
+          "data": "CategoryDTO"
+        }
+      },
+      {
+        "path": "/api/admin/categories/{id}",
+        "method": "DELETE",
+        "description": "Delete category",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "null"
+        }
+      },
+      {
+        "path": "/api/admin/tags",
+        "method": "GET",
+        "description": "Get all tags (admin)",
+        "authentication": "Required (ADMIN role)",
+        "request": {},
+        "response": {
+          "data": "TagDTO[]"
+        }
+      },
+      {
+        "path": "/api/admin/tags/paged",
+        "method": "GET",
+        "description": "Get all tags (paginated)",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "query": {
+            "page": "number (default: 0)",
+            "size": "number (default: 10)"
+          }
+        },
+        "response": {
+          "data": "PageResult<TagDTO>"
+        }
+      },
+      {
+        "path": "/api/admin/tags/{id}",
+        "method": "GET",
+        "description": "Get tag by ID (admin)",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "TagDTO"
+        }
+      },
+      {
+        "path": "/api/admin/tags",
+        "method": "POST",
+        "description": "Create tag",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "contentType": "application/json",
+          "body": {
+            "name": "string (1-50 chars, required)",
+            "slug": "string (max 100 chars, optional)"
+          }
+        },
+        "response": {
+          "data": "TagDTO"
+        }
+      },
+      {
+        "path": "/api/admin/tags/{id}",
+        "method": "PUT",
+        "description": "Update tag",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          },
+          "contentType": "application/json",
+          "body": {
+            "name": "string (1-50 chars, required)",
+            "slug": "string (max 100 chars, optional)"
+          }
+        },
+        "response": {
+          "data": "TagDTO"
+        }
+      },
+      {
+        "path": "/api/admin/tags/{id}",
+        "method": "DELETE",
+        "description": "Delete tag",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "null"
+        }
+      },
+      {
+        "path": "/api/admin/comments",
+        "method": "GET",
+        "description": "Get all comments (with status filter, paginated)",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "query": {
+            "page": "number (default: 0)",
+            "size": "number (default: 10)",
+            "status": "PENDING | APPROVED | REJECTED (optional)"
+          }
+        },
+        "response": {
+          "data": "PageResult<CommentDTO>"
+        }
+      },
+      {
+        "path": "/api/admin/comments/{id}",
+        "method": "GET",
+        "description": "Get comment by ID (admin)",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "CommentDTO"
+        }
+      },
+      {
+        "path": "/api/admin/comments/pending/count",
+        "method": "GET",
+        "description": "Get pending comments count",
+        "authentication": "Required (ADMIN role)",
+        "request": {},
+        "response": {
+          "data": "number"
+        }
+      },
+      {
+        "path": "/api/admin/comments/{id}/approve",
+        "method": "POST",
+        "description": "Approve comment",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "CommentDTO"
+        }
+      },
+      {
+        "path": "/api/admin/comments/{id}/reject",
+        "method": "POST",
+        "description": "Reject comment",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "CommentDTO"
+        }
+      },
+      {
+        "path": "/api/admin/comments/{id}",
+        "method": "DELETE",
+        "description": "Delete comment",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "null"
+        }
+      },
+      {
+        "path": "/api/admin/users",
+        "method": "GET",
+        "description": "Get all users (paginated)",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "query": {
+            "page": "number (default: 0)",
+            "size": "number (default: 10)"
+          }
+        },
+        "response": {
+          "data": "PageResult<UserDTO>"
+        }
+      },
+      {
+        "path": "/api/admin/users/{id}",
+        "method": "GET",
+        "description": "Get user by ID",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "UserDTO"
+        }
+      },
+      {
+        "path": "/api/admin/users/{id}/toggle-status",
+        "method": "POST",
+        "description": "Toggle user enabled status",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "null"
+        }
+      },
+      {
+        "path": "/api/admin/users/{id}",
+        "method": "DELETE",
+        "description": "Delete user",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "id": "number"
+          }
+        },
+        "response": {
+          "data": "null"
+        }
+      },
+      {
+        "path": "/api/admin/upload",
+        "method": "POST",
+        "description": "Upload single image",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "contentType": "multipart/form-data",
+          "body": {
+            "file": "image file (required)"
+          }
+        },
+        "response": {
+          "data": {
+            "url": "string",
+            "filename": "string",
+            "originalFilename": "string",
+            "size": "number",
+            "contentType": "string"
+          }
+        }
+      },
+      {
+        "path": "/api/admin/upload/batch",
+        "method": "POST",
+        "description": "Upload multiple images",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "contentType": "multipart/form-data",
+          "body": {
+            "files": "image file[] (required)"
+          }
+        },
+        "response": {
+          "data": "UploadResponse[]"
+        }
+      },
+      {
+        "path": "/api/admin/settings",
+        "method": "GET",
+        "description": "Get all settings (admin)",
+        "authentication": "Required (ADMIN role)",
+        "request": {},
+        "response": {
+          "data": "SettingDTO[]"
+        }
+      },
+      {
+        "path": "/api/admin/settings/{key}",
+        "method": "GET",
+        "description": "Get setting by key (admin)",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "key": "string"
+          }
+        },
+        "response": {
+          "data": "SettingDTO"
+        }
+      },
+      {
+        "path": "/api/admin/settings",
+        "method": "POST",
+        "description": "Create or update setting",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "contentType": "application/json",
+          "body": {
+            "key": "string (1-100 chars, required)",
+            "value": "string (optional)",
+            "description": "string (max 255 chars, optional)"
+          }
+        },
+        "response": {
+          "data": "SettingDTO"
+        }
+      },
+      {
+        "path": "/api/admin/settings/batch",
+        "method": "PUT",
+        "description": "Update multiple settings",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "contentType": "application/json",
+          "body": "Map<string, string> (key-value pairs)"
+        },
+        "response": {
+          "data": "null"
+        }
+      },
+      {
+        "path": "/api/admin/settings/{key}",
+        "method": "DELETE",
+        "description": "Delete setting",
+        "authentication": "Required (ADMIN role)",
+        "request": {
+          "path": {
+            "key": "string"
+          }
+        },
+        "response": {
+          "data": "null"
+        }
+      }
+    ]
+  },
+  "dataModels": {
+    "ArticleDTO": {
+      "id": "number",
+      "title": "string",
+      "slug": "string",
+      "summary": "string",
+      "content": "string",
+      "coverImage": "string",
+      "status": "DRAFT | PUBLISHED | ARCHIVED",
+      "isTop": "boolean",
+      "allowComment": "boolean",
+      "viewCount": "number",
+      "likeCount": "number",
+      "liked": "boolean (null if not authenticated)",
+      "publishedAt": "datetime",
+      "author": {
+        "id": "number",
+        "username": "string",
+        "nickname": "string",
+        "avatar": "string"
+      },
+      "category": "CategoryDTO",
+      "tags": "TagDTO[]",
+      "commentCount": "number",
+      "createdAt": "datetime",
+      "updatedAt": "datetime"
+    },
+    "CategoryDTO": {
+      "id": "number",
+      "name": "string",
+      "slug": "string",
+      "description": "string",
+      "sortOrder": "number",
+      "articleCount": "number",
+      "createdAt": "datetime",
+      "updatedAt": "datetime"
+    },
+    "TagDTO": {
+      "id": "number",
+      "name": "string",
+      "slug": "string",
+      "articleCount": "number",
+      "createdAt": "datetime",
+      "updatedAt": "datetime"
+    },
+    "CommentDTO": {
+      "id": "number",
+      "content": "string",
+      "authorName": "string",
+      "authorEmail": "string",
+      "authorUrl": "string",
+      "status": "PENDING | APPROVED | REJECTED",
+      "articleId": "number",
+      "articleTitle": "string",
+      "parentId": "number",
+      "replies": "CommentDTO[]",
+      "createdAt": "datetime",
+      "updatedAt": "datetime"
+    },
+    "UserDTO": {
+      "id": "number",
+      "username": "string",
+      "email": "string",
+      "nickname": "string",
+      "avatar": "string",
+      "role": "ADMIN | USER",
+      "enabled": "boolean",
+      "createdAt": "datetime",
+      "updatedAt": "datetime"
+    },
+    "SettingDTO": {
+      "id": "number",
+      "key": "string",
+      "value": "string",
+      "description": "string"
+    },
+    "AuthResponse": {
+      "accessToken": "string",
+      "refreshToken": "string",
+      "tokenType": "Bearer",
+      "expiresIn": "number",
+      "user": {
+        "id": "number",
+        "username": "string",
+        "email": "string",
+        "nickname": "string",
+        "avatar": "string",
+        "role": "ADMIN | USER"
+      }
+    },
+    "UploadResponse": {
+      "url": "string",
+      "filename": "string",
+      "originalFilename": "string",
+      "size": "number",
+      "contentType": "string"
+    }
+  },
+  "enums": {
+    "ArticleStatus": ["DRAFT", "PUBLISHED", "ARCHIVED"],
+    "CommentStatus": ["PENDING", "APPROVED", "REJECTED"],
+    "UserRole": ["ADMIN", "USER"]
+  },
+  "errorCodes": {
+    "200": "Success",
+    "400": "Bad Request (validation error)",
+    "401": "Unauthorized (missing or invalid token)",
+    "403": "Forbidden (insufficient permissions)",
+    "404": "Not Found",
+    "500": "Internal Server Error"
+  }
+}

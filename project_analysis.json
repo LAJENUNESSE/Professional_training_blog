@@ -1,0 +1,240 @@
+{
+  "projectOverview": {
+    "name": "Blog",
+    "type": "Full-Stack Web Application",
+    "description": "A modern blog system built with Spring Boot backend and Vue 3 frontend, featuring JWT authentication, role-based access control, and a monorepo architecture.",
+    "architecture": "Monorepo with separate backend (Spring Boot) and frontend (Vue 3 Monorepo) modules",
+    "language": "Java 21 (Backend) + TypeScript (Frontend)",
+    "status": "Active Development"
+  },
+  "directoryTree": {
+    "root": {
+      "backend": {
+        "type": "Spring Boot Application",
+        "structure": {
+          "src/main/java/com/example/blog": {
+            "BlogApplication.java": "Main application entry point",
+            "common/": "Unified response wrappers (Result, PageResult)",
+            "config/": "Security, JPA, JWT, WebMvc configurations",
+            "controller/": {
+              "public": "Auth, Article, Category, Tag, Comment, Setting controllers",
+              "admin/": "Admin-only controllers for management"
+            },
+            "dto/": {
+              "request/": "Input validation DTOs",
+              "response/": "Output DTOs"
+            },
+            "entity/": "JPA entities with BaseEntity for auditing",
+            "exception/": "Custom exceptions and global handler",
+            "repository/": "Spring Data JPA repositories",
+            "security/": "JWT filter, token provider, UserDetailsService",
+            "service/": "Business logic layer"
+          },
+          "src/main/resources": {
+            "application.yml": "Main configuration (DB, JWT, server)",
+            "db/migration/": "Flyway SQL migrations"
+          },
+          "pom.xml": "Maven dependencies and build config"
+        }
+      },
+      "frontend": {
+        "type": "Vue 3 Monorepo",
+        "structure": {
+          "packages/": {
+            "shared/": {
+              "name": "@blog/shared",
+              "type": "Shared library",
+              "exports": ["api", "types", "utils", "composables", "constants"],
+              "dependencies": ["axios", "dayjs"],
+              "peerDependencies": ["vue", "pinia"]
+            },
+            "web/": {
+              "name": "@blog/web",
+              "type": "Public Blog Frontend",
+              "port": 3000,
+              "features": ["markdown rendering", "syntax highlighting", "Tailwind CSS"],
+              "dependencies": ["@blog/shared", "markdown-it", "highlight.js", "pinia", "vue", "vue-router"]
+            },
+            "admin/": {
+              "name": "@blog/admin",
+              "type": "Admin Dashboard",
+              "port": 3001,
+              "features": ["Naive UI", "ByteMD editor", "CRUD operations"],
+              "dependencies": ["@blog/shared", "bytemd", "naive-ui", "pinia", "vue", "vue-router"]
+            }
+          }
+        }
+      },
+      "scripts/": {
+        "start-all.sh": "Launches all services (backend + both frontends)",
+        "start-backend.sh": "Backend only",
+        "start-frontend.sh": "Frontend only"
+      },
+      "uploads/": "User uploaded files storage",
+      "blog.db": "SQLite database file (gitignored)"
+    }
+  },
+  "moduleDependencies": {
+    "backend": {
+      "core": ["Spring Boot 4.0.1", "Java 21"],
+      "database": ["SQLite", "Hibernate ORM", "Hibernate Community Dialects", "Flyway"],
+      "security": ["Spring Security 7", "JWT (jjwt 0.12.6)"],
+      "web": ["Spring Web", "Validation"],
+      "utilities": ["Lombok"],
+      "testing": ["Spring Boot Test", "Spring Security Test"]
+    },
+    "frontend": {
+      "shared": {
+        "runtime": ["axios", "dayjs"],
+        "peer": ["vue ^3.5.13", "pinia ^2.3.0"]
+      },
+      "web": {
+        "core": ["vue", "vue-router", "pinia"],
+        "markdown": ["markdown-it", "highlight.js"],
+        "styling": ["tailwindcss", "@tailwindcss/typography"],
+        "build": ["vite", "vue-tsc"]
+      },
+      "admin": {
+        "core": ["vue", "vue-router", "pinia", "naive-ui"],
+        "markdown": ["bytemd", "@bytemd/plugin-gfm", "@bytemd/plugin-highlight"],
+        "styling": ["tailwindcss"],
+        "build": ["vite", "vue-tsc"]
+      }
+    }
+  },
+  "technologyStack": {
+    "backend": {
+      "language": "Java 21",
+      "framework": "Spring Boot 4.0.1",
+      "security": "Spring Security 7 + JWT",
+      "database": "SQLite + Hibernate JPA",
+      "migrations": "Flyway",
+      "buildTool": "Maven",
+      "patterns": ["REST API", "Repository Pattern", "Service Layer", "DTO Pattern"]
+    },
+    "frontend": {
+      "language": "TypeScript",
+      "framework": "Vue 3",
+      "stateManagement": "Pinia",
+      "routing": "Vue Router",
+      "styling": {
+        "web": "Tailwind CSS",
+        "admin": "Naive UI + Tailwind CSS"
+      },
+      "markdown": "ByteMD (admin) + markdown-it (web)",
+      "buildTool": "Vite",
+      "architecture": "Monorepo with Workspace Dependencies"
+    }
+  },
+  "entryPoints": {
+    "backend": {
+      "main": "com.example.blog.BlogApplication.main()",
+      "port": 8080,
+      "basePath": "/api"
+    },
+    "frontend": {
+      "web": {
+        "entry": "frontend/packages/web/src/main.ts",
+        "port": 3000,
+        "proxy": "/api -> localhost:8080"
+      },
+      "admin": {
+        "entry": "frontend/packages/admin/src/main.ts",
+        "port": 3001,
+        "proxy": "/api -> localhost:8080"
+      }
+    }
+  },
+  "mainExecutionFlow": {
+    "backend": [
+      "BlogApplication.main() starts Spring Boot",
+      "Flyway runs database migrations",
+      "SecurityConfig sets up JWT filter chain",
+      "REST API endpoints become available on port 8080"
+    ],
+    "frontend": [
+      "Vite dev server starts on port 3000/3001",
+      "Vue app mounts with Pinia + Router",
+      "API requests proxy to backend",
+      "User authentication via JWT tokens"
+    ]
+  },
+  "apiStructure": {
+    "public": [
+      "POST /api/auth/login",
+      "POST /api/auth/register",
+      "GET /api/articles/**",
+      "GET /api/categories/**",
+      "GET /api/tags/**",
+      "GET/POST /api/comments/**",
+      "GET /api/settings/**"
+    ],
+    "admin": [
+      "All /api/admin/** endpoints (requires ADMIN role)",
+      "CRUD operations for articles, categories, tags, users, comments, settings"
+    ],
+    "responseFormat": {
+      "success": "{\"code\": 200, \"message\": \"success\", \"data\": {...}}",
+      "error": "{\"code\": 400/401/500, \"message\": \"error description\", \"data\": null}"
+    }
+  },
+  "databaseSchema": {
+    "tables": [
+      "users: id, username, password, email, nickname, avatar, role, enabled, timestamps",
+      "categories: id, name, slug, description, sort_order, timestamps",
+      "tags: id, name, slug, timestamps",
+      "articles: id, title, slug, summary, content, cover_image, status, is_top, allow_comment, view_count, like_count, timestamps",
+      "comments: id, content, article_id, user_id, parent_id, timestamps",
+      "article_likes: id, article_id, user_id, timestamps",
+      "settings: id, key, value, description"
+    ],
+    "type": "SQLite",
+    "migrationTool": "Flyway"
+  },
+  "security": {
+    "authentication": "JWT tokens (24h expiration, 7d refresh)",
+    "authorization": "Role-based (ADMIN, USER)",
+    "passwordHashing": "BCrypt",
+    "cors": "Allowed origins: *",
+    "session": "Stateless (no server-side sessions)"
+  },
+  "defaultCredentials": {
+    "admin": {
+      "username": "admin",
+      "password": "admin123",
+      "role": "ADMIN"
+    }
+  },
+  "buildAndRun": {
+    "backend": {
+      "compile": "cd backend && ./mvnw compile",
+      "run": "cd backend && ./mvnw spring-boot:run",
+      "test": "cd backend && ./mvnw test",
+      "package": "cd backend && ./mvnw package -DskipTests"
+    },
+    "frontend": {
+      "install": "cd frontend && npm install",
+      "dev:web": "cd frontend && npm run dev:web",
+      "dev:admin": "cd frontend && npm run dev:admin",
+      "build": "cd frontend && npm run build",
+      "lint": "cd frontend && npm run lint",
+      "format": "cd frontend && npm run format"
+    },
+    "all": {
+      "script": "./scripts/start-all.sh",
+      "description": "Starts backend + both frontend apps simultaneously"
+    }
+  },
+  "keyFeatures": [
+    "JWT Authentication with refresh tokens",
+    "Role-based access control (ADMIN/USER)",
+    "Markdown editor for articles (ByteMD)",
+    "Syntax highlighting for code blocks",
+    "File upload management (10MB limit)",
+    "Database migrations with Flyway",
+    "Monorepo architecture with shared packages",
+    "SPA routing with Vue Router",
+    "Responsive design with Tailwind CSS",
+    "Admin dashboard with Naive UI components"
+  ]
+}
