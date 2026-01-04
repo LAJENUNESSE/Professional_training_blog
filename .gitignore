@@ -95,3 +95,7 @@ pnpm-debug.log*
 
 # TypeScript cache
 *.tsbuildinfo
+
+
+# python 虚拟环境
+venv
