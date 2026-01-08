@@ -505,7 +505,11 @@ class FileStorageServiceTest {
         when(file.getContentType()).thenReturn(contentType);
         when(file.getSize()).thenReturn((long) content.length());
         when(file.isEmpty()).thenReturn(content.isEmpty());
-        when(file.getInputStream()).thenReturn(new ByteArrayInputStream(content.getBytes()));
+        try {
+            when(file.getInputStream()).thenReturn(new ByteArrayInputStream(content.getBytes()));
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
         return file;
     }
 

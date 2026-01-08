@@ -24,9 +24,18 @@ public class CategoryService {
 
     @Cacheable(cacheNames = CacheNames.CATEGORY_LIST, sync = true)
     public List<CategoryDTO> getAllCategories() {
-        return categoryRepository.findAllByOrderBySortOrderAsc()
+        return categoryRepository.findAllWithArticleCount()
                 .stream()
-                .map(CategoryDTO::fromEntity)
+                .map(summary -> CategoryDTO.builder()
+                        .id(summary.getCategory().getId())
+                        .name(summary.getCategory().getName())
+                        .slug(summary.getCategory().getSlug())
+                        .description(summary.getCategory().getDescription())
+                        .sortOrder(summary.getCategory().getSortOrder())
+                        .articleCount(summary.getArticleCount())
+                        .createdAt(summary.getCategory().getCreatedAt())
+                        .updatedAt(summary.getCategory().getUpdatedAt())
+                        .build())
                 .collect(Collectors.toList());
     }
 

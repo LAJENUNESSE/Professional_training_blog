@@ -385,7 +385,7 @@ class JwtTokenProviderTest {
         long actualExpiration = expiration - issuedAt;
 
         // 验证过期时间设置正确（允许100ms的误差）
-        assertThat(actualExpiration).isCloseTo(3600000L, 100L);
+        assertThat(actualExpiration).isCloseTo(3600000L, within(100L));
     }
 
     @Test
@@ -409,7 +409,7 @@ class JwtTokenProviderTest {
         long actualExpiration = expiration - issuedAt;
 
         // 验证刷新token过期时间（24小时）
-        assertThat(actualExpiration).isCloseTo(86400000L, 100L);
+        assertThat(actualExpiration).isCloseTo(86400000L, within(100L));
     }
 
     @Test

@@ -329,7 +329,7 @@ class ArticleServiceTest {
 
         verify(userRepository, times(1)).findByUsername(username);
         verify(categoryRepository, times(1)).findById(1L);
-        verify(tagRepository, times(1)).findByIdIn(List.of(1L));
+        verify(tagRepository, times(1)).findByIdIn(Set.of(1L));
         verify(articleRepository, times(1)).save(any(Article.class));
     }
 
@@ -746,7 +746,7 @@ class ArticleServiceTest {
     @DisplayName("should_handle_empty_tag_list")
     void testCreateArticle_EmptyTagList() {
         // Given
-        articleRequest.setTagIds(Collections.emptyList());
+        articleRequest.setTagIds(Collections.emptySet());
         String username = "author";
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(author));
         when(articleRepository.save(any(Article.class))).thenAnswer(invocation -> {
@@ -783,7 +783,7 @@ class ArticleServiceTest {
     @DisplayName("should_update_article_set_tags_to_empty")
     void testUpdateArticle_SetTagsEmpty() {
         // Given
-        articleRequest.setTagIds(Collections.emptyList());
+        articleRequest.setTagIds(Collections.emptySet());
         when(articleRepository.findById(1L)).thenReturn(Optional.of(article));
         when(userRepository.findByUsername("author")).thenReturn(Optional.of(author));
         when(articleRepository.save(any(Article.class))).thenReturn(article);

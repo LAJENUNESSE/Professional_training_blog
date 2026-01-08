@@ -1,15 +1,16 @@
 package com.example.blog.config;
 
 import com.example.blog.cache.CacheNames;
-import com.example.blog.cache.CacheProperties;
 import com.example.blog.cache.JitterExpiry;
 import com.example.blog.cache.MultiLevelCacheManager;
+import com.example.blog.cache.CacheProperties;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.support.NoOpCacheManager;
@@ -31,19 +32,19 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Configuration
 @EnableCaching
-@EnableConfigurationProperties(CacheProperties.class)
 public class CacheConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(CacheConfig.class);
 
     @Bean
     public CacheManager cacheManager(CacheProperties properties,
-                                     ObjectMapper objectMapper,
+                                     ObjectProvider<ObjectMapper> objectMapperProvider,
                                      ObjectProvider<RedisConnectionFactory> redisConnectionFactoryProvider) {
         if (!properties.isEnabled()) {
             return new NoOpCacheManager();
         }
 
+        ObjectMapper objectMapper = objectMapperProvider.getIfAvailable(() -> new ObjectMapper().findAndRegisterModules());
         CaffeineCacheManager l1CacheManager = buildCaffeineCacheManager(properties);
 
         if (!properties.isRedisEnabled()) {
@@ -107,9 +108,17 @@ public class CacheConfig {
     private RedisCacheManager buildRedisCacheManager(CacheProperties properties,
                                                      ObjectMapper objectMapper,
                                                      RedisConnectionFactory connectionFactory) {
+        // Create a copy of ObjectMapper with type information for Redis
+        ObjectMapper redisObjectMapper = objectMapper.copy();
+        redisObjectMapper.activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY
+        );
+
         RedisCacheConfiguration baseConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(redisObjectMapper)));
 
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
         cacheConfigs.put(CacheNames.PUBLISHED_ARTICLES, baseConfig.entryTtl(withJitter(properties.getPublishedTtl(), properties.getL2Jitter())));

@@ -371,7 +371,7 @@ class CategoryServiceTest {
     @DisplayName("should_delete_category_successfully")
     void testDeleteCategory_Success() {
         // Given
-        category.setArticles(new java.util.HashSet<>()); // 没有关联文章
+        category.setArticles(new java.util.ArrayList<>()); // 没有关联文章
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         doNothing().when(categoryRepository).delete(category);
 
@@ -543,7 +543,7 @@ class CategoryServiceTest {
     @DisplayName("should_verify_dto_mapping_complete")
     void testGetCategoryById_VerifyDTOMapping() {
         // Given
-        category.setArticles(new java.util.HashSet<>());
+        category.setArticles(new java.util.ArrayList<>());
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
 
         // When

@@ -31,42 +31,49 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, JpaSpec
     @EntityGraph(attributePaths = {"author", "category", "tags"})
     List<Article> findByIdInAndStatus(Collection<Long> ids, Article.Status status);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     Page<Article> findByStatus(Article.Status status, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category", "tags"})
-    Page<Article> findByStatusWithTags(Article.Status status, Pageable pageable);
+    @Query(
+            value = "SELECT DISTINCT a FROM Article a " +
+                    "LEFT JOIN FETCH a.author " +
+                    "LEFT JOIN FETCH a.category " +
+                    "LEFT JOIN FETCH a.tags " +
+                    "WHERE a.status = :status",
+            countQuery = "SELECT COUNT(a) FROM Article a WHERE a.status = :status"
+    )
+    Page<Article> findByStatusWithTags(@Param("status") Article.Status status, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     Page<Article> findByAuthor(User author, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     Page<Article> findByCategory(Category category, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     Page<Article> findByCategoryAndStatus(Category category, Article.Status status, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     Page<Article> findByTagsContaining(Tag tag, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     Page<Article> findByTagsContainingAndStatus(Tag tag, Article.Status status, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     Page<Article> findAll(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     Page<Article> findAll(Specification<Article> spec, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     @Query("SELECT a FROM Article a WHERE a.status = :status ORDER BY a.isTop DESC, a.publishedAt DESC")
     Page<Article> findPublishedArticles(@Param("status") Article.Status status, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     @Query("SELECT a FROM Article a WHERE a.status = 'PUBLISHED' ORDER BY a.viewCount DESC, a.publishedAt DESC")
     Page<Article> findHotPublishedArticles(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"author", "category"})
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
     @Query("SELECT a FROM Article a WHERE a.status = 'PUBLISHED' AND " +
            "(LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(a.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")

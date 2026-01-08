@@ -26,9 +26,16 @@ public class TagService {
 
     @Cacheable(cacheNames = CacheNames.TAG_LIST, sync = true)
     public List<TagDTO> getAllTags() {
-        return tagRepository.findAll()
+        return tagRepository.findAllWithArticleCount()
                 .stream()
-                .map(TagDTO::fromEntity)
+                .map(summary -> TagDTO.builder()
+                        .id(summary.getTag().getId())
+                        .name(summary.getTag().getName())
+                        .slug(summary.getTag().getSlug())
+                        .articleCount(summary.getArticleCount())
+                        .createdAt(summary.getTag().getCreatedAt())
+                        .updatedAt(summary.getTag().getUpdatedAt())
+                        .build())
                 .collect(Collectors.toList());
     }
 
