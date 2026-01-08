@@ -6,6 +6,7 @@ import type {
   ArticleDTO,
   ArticleRequest,
   ArticleLikeResponse,
+  ArticleSuggestionDTO,
 } from '../types'
 
 export const articleApi = {
@@ -26,6 +27,11 @@ export const articleApi = {
   search: (keyword: string, params?: PageParams) =>
     request.get<Result<PageResult<ArticleDTO>>>('/api/articles/search', {
       params: { keyword, ...params },
+    }),
+
+  suggest: (keyword: string, size?: number) =>
+    request.get<Result<ArticleSuggestionDTO[]>>('/api/articles/suggest', {
+      params: { keyword, size },
     }),
 
   like: (id: number) => request.post<Result<ArticleLikeResponse>>(`/api/articles/${id}/like`),

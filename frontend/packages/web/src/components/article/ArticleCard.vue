@@ -1,11 +1,17 @@
 <script setup lang="ts">
+  import { computed } from 'vue'
   import { RouterLink } from 'vue-router'
   import type { ArticleDTO } from '@blog/shared'
   import { formatRelativeTime } from '@blog/shared'
 
-  defineProps<{
+  const props = defineProps<{
     article: ArticleDTO
   }>()
+
+  const highlightTitle = computed(() => props.article.highlightTitle || '')
+  const highlightSnippet = computed(
+    () => props.article.highlightSummary || props.article.highlightContent || ''
+  )
 </script>
 
 <template>
@@ -34,11 +40,17 @@
         <h2
           class="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-2"
         >
-          {{ article.title }}
+          <span v-if="highlightTitle" v-html="highlightTitle"></span>
+          <span v-else>{{ article.title }}</span>
         </h2>
 
         <!-- Summary -->
-        <p v-if="article.summary" class="text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+        <p
+          v-if="highlightSnippet"
+          class="text-gray-600 dark:text-gray-400 line-clamp-2 mb-3"
+          v-html="highlightSnippet"
+        ></p>
+        <p v-else-if="article.summary" class="text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
           {{ article.summary }}
         </p>
 

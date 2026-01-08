@@ -20,6 +20,9 @@ export interface ArticleDTO {
   viewCount: number
   likeCount: number
   liked?: boolean | null
+  highlightTitle?: string | null
+  highlightSummary?: string | null
+  highlightContent?: string | null
   publishedAt: string | null
   author: AuthorInfo
   category: import('./category').CategoryDTO | null
@@ -27,6 +30,12 @@ export interface ArticleDTO {
   commentCount: number
   createdAt: string
   updatedAt: string
+}
+
+export interface ArticleSuggestionDTO {
+  id: number
+  title: string
+  slug: string
 }
 
 export interface ArticleRequest {

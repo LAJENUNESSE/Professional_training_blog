@@ -1,16 +1,35 @@
 <script setup lang="ts">
   import { ref, onMounted, watch } from 'vue'
-  import { useRoute } from 'vue-router'
-  import { articleApi, type ArticleDTO, type PageResult } from '@blog/shared'
+  import { RouterLink, useRoute } from 'vue-router'
+  import { articleApi, type ArticleDTO, type ArticleSuggestionDTO, type PageResult } from '@blog/shared'
   import ArticleCard from '@/components/article/ArticleCard.vue'
 
   const route = useRoute()
   const keyword = ref('')
   const articles = ref<ArticleDTO[]>([])
+  const suggestions = ref<ArticleSuggestionDTO[]>([])
+  const suggestionLoading = ref(false)
   const loading = ref(false)
   const currentPage = ref(0)
   const hasMore = ref(false)
   const total = ref(0)
+
+  async function loadSuggestions() {
+    if (!keyword.value.trim()) return
+
+    suggestionLoading.value = true
+    try {
+      const res = (await articleApi.suggest(keyword.value, 5)) as unknown as {
+        data: ArticleSuggestionDTO[]
+      }
+      suggestions.value = res.data
+    } catch (error) {
+      console.error('Failed to load suggestions:', error)
+      suggestions.value = []
+    } finally {
+      suggestionLoading.value = false
+    }
+  }
 
   async function search(page = 0) {
     if (!keyword.value.trim()) return
@@ -29,6 +48,13 @@
       currentPage.value = res.data.pageNumber
       hasMore.value = !res.data.last
       total.value = res.data.totalElements
+      if (page === 0) {
+        if (res.data.totalElements === 0) {
+          await loadSuggestions()
+        } else {
+          suggestions.value = []
+        }
+      }
     } catch (error) {
       console.error('Failed to search:', error)
     } finally {
@@ -46,6 +72,7 @@
     () => route.query.keyword,
     (newKeyword) => {
       keyword.value = (newKeyword as string) || ''
+      suggestions.value = []
       if (keyword.value) {
         search(0)
       }
@@ -55,6 +82,7 @@
 
   onMounted(() => {
     keyword.value = (route.query.keyword as string) || ''
+    suggestions.value = []
     if (keyword.value) {
       search()
     }
@@ -81,6 +109,20 @@
     <!-- Empty -->
     <div v-else-if="articles.length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
       未找到相关文章
+      <div v-if="suggestions.length" class="mt-6 text-left max-w-2xl mx-auto">
+        <p class="text-sm text-gray-500 dark:text-gray-400">猜你想看</p>
+        <ul class="mt-3 space-y-2">
+          <li v-for="suggestion in suggestions" :key="suggestion.id">
+            <RouterLink
+              :to="`/article/${suggestion.slug}`"
+              class="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+            >
+              {{ suggestion.title }}
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
+      <p v-else-if="suggestionLoading" class="mt-6 text-sm text-gray-400">加载推荐中...</p>
     </div>
 
     <!-- Articles -->
