@@ -8,18 +8,26 @@ import com.example.blog.entity.Category;
 import com.example.blog.entity.Tag;
 import com.example.blog.entity.User;
 import com.example.blog.exception.BusinessException;
+import com.example.blog.cache.CacheNames;
+import com.example.blog.repository.ArticleSpecifications;
 import com.example.blog.repository.ArticleRepository;
 import com.example.blog.repository.ArticleLikeRepository;
 import com.example.blog.repository.CategoryRepository;
 import com.example.blog.repository.TagRepository;
 import com.example.blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -33,7 +41,13 @@ public class ArticleService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
+    private final CategoryService categoryService;
+    private final TagService tagService;
 
+    @Cacheable(cacheNames = CacheNames.PUBLISHED_ARTICLES,
+            key = "T(com.example.blog.cache.CacheKeys).pageKey(#pageable)",
+            condition = "#pageable.pageNumber < @cacheProperties.maxCachedPages",
+            sync = true)
     public Page<ArticleDTO> getPublishedArticles(Pageable pageable) {
         return articleRepository.findPublishedArticles(Article.Status.PUBLISHED, pageable)
                 .map(ArticleDTO::fromEntityList);
@@ -48,8 +62,10 @@ public class ArticleService {
     }
 
     public Page<ArticleDTO> getArticlesByCategory(Long categoryId, Pageable pageable) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> BusinessException.notFound("Category not found"));
+        if (!categoryService.existsByIdCached(categoryId)) {
+            throw BusinessException.notFound("Category not found");
+        }
+        Category category = categoryRepository.getReferenceById(categoryId);
         return articleRepository.findByCategory(category, pageable).map(ArticleDTO::fromEntityList);
     }
 
@@ -60,9 +76,47 @@ public class ArticleService {
     }
 
     public Page<ArticleDTO> getArticlesByTag(Long tagId, Pageable pageable) {
-        Tag tag = tagRepository.findById(tagId)
-                .orElseThrow(() -> BusinessException.notFound("Tag not found"));
+        if (!tagService.existsByIdCached(tagId)) {
+            throw BusinessException.notFound("Tag not found");
+        }
+        Tag tag = tagRepository.getReferenceById(tagId);
         return articleRepository.findByTagsContaining(tag, pageable).map(ArticleDTO::fromEntityList);
+    }
+
+    @Cacheable(cacheNames = CacheNames.ARTICLES_BY_CATEGORY,
+            key = "T(com.example.blog.cache.CacheKeys).pageKey(#categoryId, #pageable)",
+            condition = "#pageable.pageNumber < @cacheProperties.maxCachedPages",
+            sync = true)
+    public Page<ArticleDTO> getPublishedArticlesByCategory(Long categoryId, Pageable pageable) {
+        if (!categoryService.existsByIdCached(categoryId)) {
+            throw BusinessException.notFound("Category not found");
+        }
+        Category category = categoryRepository.getReferenceById(categoryId);
+        return articleRepository.findByCategoryAndStatus(category, Article.Status.PUBLISHED, pageable)
+                .map(ArticleDTO::fromEntityList);
+    }
+
+    @Cacheable(cacheNames = CacheNames.ARTICLES_BY_TAG,
+            key = "T(com.example.blog.cache.CacheKeys).pageKey(#tagId, #pageable)",
+            condition = "#pageable.pageNumber < @cacheProperties.maxCachedPages",
+            sync = true)
+    public Page<ArticleDTO> getPublishedArticlesByTag(Long tagId, Pageable pageable) {
+        if (!tagService.existsByIdCached(tagId)) {
+            throw BusinessException.notFound("Tag not found");
+        }
+        Tag tag = tagRepository.getReferenceById(tagId);
+        return articleRepository.findByTagsContainingAndStatus(tag, Article.Status.PUBLISHED, pageable)
+                .map(ArticleDTO::fromEntityList);
+    }
+
+    @Cacheable(cacheNames = CacheNames.HOT_ARTICLES,
+            key = "T(com.example.blog.cache.CacheKeys).sizeKey(#size)",
+            condition = "#size <= @cacheProperties.maxHotSize",
+            sync = true)
+    public List<ArticleDTO> getHotArticles(int size) {
+        return articleRepository.findHotPublishedArticles(PageRequest.of(0, size))
+                .map(ArticleDTO::fromEntityList)
+                .toList();
     }
 
     public Page<ArticleDTO> getArticlesByTag(Long tagId, Article.Status status, Pageable pageable) {
@@ -73,6 +127,15 @@ public class ArticleService {
 
     public Page<ArticleDTO> searchArticles(String keyword, Pageable pageable) {
         return articleRepository.searchByKeyword(keyword, pageable).map(ArticleDTO::fromEntityList);
+    }
+
+    public Page<ArticleDTO> searchArticles(Article.Status status,
+                                           Long categoryId,
+                                           Long tagId,
+                                           String keyword,
+                                           Pageable pageable) {
+        Specification<Article> specification = ArticleSpecifications.withFilters(status, categoryId, tagId, keyword);
+        return articleRepository.findAll(specification, pageable).map(ArticleDTO::fromEntityList);
     }
 
     @Transactional(readOnly = true)
@@ -102,6 +165,12 @@ public class ArticleService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.PUBLISHED_ARTICLES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_CATEGORY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_TAG, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.HOT_ARTICLES, allEntries = true)
+    })
     public ArticleDTO createArticle(ArticleRequest request, String username) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> BusinessException.notFound("User not found"));
@@ -137,6 +206,12 @@ public class ArticleService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.PUBLISHED_ARTICLES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_CATEGORY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_TAG, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.HOT_ARTICLES, allEntries = true)
+    })
     public ArticleDTO updateArticle(Long id, ArticleRequest request, String username) {
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Article not found"));
@@ -182,6 +257,12 @@ public class ArticleService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.PUBLISHED_ARTICLES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_CATEGORY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_TAG, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.HOT_ARTICLES, allEntries = true)
+    })
     public void deleteArticle(Long id, String username) {
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Article not found"));

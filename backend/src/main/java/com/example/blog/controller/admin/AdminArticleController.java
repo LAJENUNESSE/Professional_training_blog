@@ -27,28 +27,14 @@ public class AdminArticleController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long tagId) {
+            @RequestParam(required = false) Long tagId,
+            @RequestParam(required = false) String keyword) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Article.Status parsedStatus = status != null && !status.isEmpty() ? Article.Status.valueOf(status) : null;
 
-        if (categoryId != null) {
-            if (parsedStatus != null) {
-                return Result.success(PageResult.of(articleService.getArticlesByCategory(categoryId, parsedStatus, pageable)));
-            }
-            return Result.success(PageResult.of(articleService.getArticlesByCategory(categoryId, pageable)));
-        }
-
-        if (tagId != null) {
-            if (parsedStatus != null) {
-                return Result.success(PageResult.of(articleService.getArticlesByTag(tagId, parsedStatus, pageable)));
-            }
-            return Result.success(PageResult.of(articleService.getArticlesByTag(tagId, pageable)));
-        }
-
-        if (parsedStatus != null) {
-            return Result.success(PageResult.of(articleService.getArticlesByStatus(parsedStatus, pageable)));
-        }
-        return Result.success(PageResult.of(articleService.getAllArticles(pageable)));
+        return Result.success(PageResult.of(
+                articleService.searchArticles(parsedStatus, categoryId, tagId, keyword, pageable)
+        ));
     }
 
     @GetMapping("/{id}")

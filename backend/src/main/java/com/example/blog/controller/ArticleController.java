@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
@@ -26,6 +28,13 @@ public class ArticleController {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publishedAt"));
         return Result.success(PageResult.of(articleService.getPublishedArticles(pageable)));
+    }
+
+    @GetMapping("/hot")
+    public Result<List<ArticleDTO>> getHotArticles(
+            @RequestParam(defaultValue = "10") int size) {
+        int resolvedSize = Math.max(1, size);
+        return Result.success(articleService.getHotArticles(resolvedSize));
     }
 
     @GetMapping("/{id}")
@@ -54,7 +63,7 @@ public class ArticleController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publishedAt"));
-        return Result.success(PageResult.of(articleService.getArticlesByCategory(categoryId, pageable)));
+        return Result.success(PageResult.of(articleService.getPublishedArticlesByCategory(categoryId, pageable)));
     }
 
     @GetMapping("/tag/{tagId}")
@@ -63,7 +72,7 @@ public class ArticleController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publishedAt"));
-        return Result.success(PageResult.of(articleService.getArticlesByTag(tagId, pageable)));
+        return Result.success(PageResult.of(articleService.getPublishedArticlesByTag(tagId, pageable)));
     }
 
     @GetMapping("/search")

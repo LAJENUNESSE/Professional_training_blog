@@ -4,8 +4,12 @@ import com.example.blog.dto.request.CategoryRequest;
 import com.example.blog.dto.response.CategoryDTO;
 import com.example.blog.entity.Category;
 import com.example.blog.exception.BusinessException;
+import com.example.blog.cache.CacheNames;
 import com.example.blog.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +22,17 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    @Cacheable(cacheNames = CacheNames.CATEGORY_LIST, sync = true)
     public List<CategoryDTO> getAllCategories() {
         return categoryRepository.findAllByOrderBySortOrderAsc()
                 .stream()
                 .map(CategoryDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Cacheable(cacheNames = CacheNames.CATEGORY_EXISTS, key = "#id", sync = true)
+    public boolean existsByIdCached(Long id) {
+        return categoryRepository.existsById(id);
     }
 
     public CategoryDTO getCategoryById(Long id) {
@@ -38,6 +48,14 @@ public class CategoryService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.CATEGORY_LIST, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.CATEGORY_EXISTS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PUBLISHED_ARTICLES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_CATEGORY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_TAG, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.HOT_ARTICLES, allEntries = true)
+    })
     public CategoryDTO createCategory(CategoryRequest request) {
         if (categoryRepository.existsByName(request.getName())) {
             throw BusinessException.badRequest("Category name already exists");
@@ -54,6 +72,14 @@ public class CategoryService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.CATEGORY_LIST, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.CATEGORY_EXISTS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PUBLISHED_ARTICLES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_CATEGORY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_TAG, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.HOT_ARTICLES, allEntries = true)
+    })
     public CategoryDTO updateCategory(Long id, CategoryRequest request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Category not found"));
@@ -72,6 +98,14 @@ public class CategoryService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.CATEGORY_LIST, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.CATEGORY_EXISTS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PUBLISHED_ARTICLES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_CATEGORY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_TAG, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.HOT_ARTICLES, allEntries = true)
+    })
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Category not found"));

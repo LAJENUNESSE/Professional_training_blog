@@ -66,6 +66,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/comments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/settings/**").permitAll()
+                        // Actuator (restrict in production)
+                        .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
                         // Uploads
                         .requestMatchers("/uploads/**").permitAll()
                         // Admin API endpoints (requires ADMIN role)

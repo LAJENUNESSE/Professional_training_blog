@@ -4,8 +4,12 @@ import com.example.blog.dto.request.TagRequest;
 import com.example.blog.dto.response.TagDTO;
 import com.example.blog.entity.Tag;
 import com.example.blog.exception.BusinessException;
+import com.example.blog.cache.CacheNames;
 import com.example.blog.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,11 +24,17 @@ public class TagService {
 
     private final TagRepository tagRepository;
 
+    @Cacheable(cacheNames = CacheNames.TAG_LIST, sync = true)
     public List<TagDTO> getAllTags() {
         return tagRepository.findAll()
                 .stream()
                 .map(TagDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Cacheable(cacheNames = CacheNames.TAG_EXISTS, key = "#id", sync = true)
+    public boolean existsByIdCached(Long id) {
+        return tagRepository.existsById(id);
     }
 
     public Page<TagDTO> getAllTagsPaged(Pageable pageable) {
@@ -44,6 +54,14 @@ public class TagService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.TAG_LIST, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.TAG_EXISTS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PUBLISHED_ARTICLES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_CATEGORY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_TAG, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.HOT_ARTICLES, allEntries = true)
+    })
     public TagDTO createTag(TagRequest request) {
         if (tagRepository.existsByName(request.getName())) {
             throw BusinessException.badRequest("Tag name already exists");
@@ -58,6 +76,14 @@ public class TagService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.TAG_LIST, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.TAG_EXISTS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PUBLISHED_ARTICLES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_CATEGORY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_TAG, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.HOT_ARTICLES, allEntries = true)
+    })
     public TagDTO updateTag(Long id, TagRequest request) {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Tag not found"));
@@ -74,6 +100,14 @@ public class TagService {
     }
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(cacheNames = CacheNames.TAG_LIST, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.TAG_EXISTS, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.PUBLISHED_ARTICLES, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_CATEGORY, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.ARTICLES_BY_TAG, allEntries = true),
+            @CacheEvict(cacheNames = CacheNames.HOT_ARTICLES, allEntries = true)
+    })
     public void deleteTag(Long id) {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Tag not found"));
