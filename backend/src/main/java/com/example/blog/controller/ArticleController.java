@@ -3,6 +3,7 @@ package com.example.blog.controller;
 import com.example.blog.common.PageResult;
 import com.example.blog.common.Result;
 import com.example.blog.dto.response.ArticleDTO;
+import com.example.blog.dto.response.ArticleSuggestionDTO;
 import com.example.blog.entity.Article;
 import com.example.blog.exception.BusinessException;
 import com.example.blog.service.ArticleService;
@@ -82,6 +83,14 @@ public class ArticleController {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "publishedAt"));
         return Result.success(PageResult.of(articleService.searchArticles(keyword, pageable)));
+    }
+
+    @GetMapping("/suggest")
+    public Result<List<ArticleSuggestionDTO>> suggestArticles(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "5") int size) {
+        int resolvedSize = Math.max(1, Math.min(size, 20));
+        return Result.success(articleService.suggestArticles(keyword, resolvedSize));
     }
 
     @PostMapping("/{id}/like")

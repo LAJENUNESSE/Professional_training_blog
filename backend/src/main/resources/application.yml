@@ -70,6 +70,14 @@ management:
 
 # Cache (low-memory defaults for 2c2g)
 blog:
+  search:
+    enabled: false
+    engine: MEILISEARCH
+    reindex-batch-size: 200
+    meilisearch:
+      host: http://localhost:7700
+      api-key:
+      index: articles
   cache:
     enabled: true
     redis-enabled: true

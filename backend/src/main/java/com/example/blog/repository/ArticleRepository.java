@@ -16,6 +16,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long>, JpaSpecificationExecutor<Article> {
@@ -26,8 +28,14 @@ public interface ArticleRepository extends JpaRepository<Article, Long>, JpaSpec
     @EntityGraph(attributePaths = {"author", "category", "tags"})
     Optional<Article> findById(Long id);
 
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
+    List<Article> findByIdInAndStatus(Collection<Long> ids, Article.Status status);
+
     @EntityGraph(attributePaths = {"author", "category"})
     Page<Article> findByStatus(Article.Status status, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"author", "category", "tags"})
+    Page<Article> findByStatusWithTags(Article.Status status, Pageable pageable);
 
     @EntityGraph(attributePaths = {"author", "category"})
     Page<Article> findByAuthor(User author, Pageable pageable);

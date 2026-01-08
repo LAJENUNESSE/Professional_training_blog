@@ -15,6 +15,9 @@ import com.example.blog.repository.ArticleLikeRepository;
 import com.example.blog.repository.CategoryRepository;
 import com.example.blog.repository.TagRepository;
 import com.example.blog.repository.UserRepository;
+import com.example.blog.search.ArticleIndexEvent;
+import com.example.blog.search.ArticleSearchService;
+import com.example.blog.dto.response.ArticleSuggestionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +47,8 @@ public class ArticleService {
     private final TagRepository tagRepository;
     private final CategoryService categoryService;
     private final TagService tagService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final ArticleSearchService articleSearchService;
 
     @Cacheable(cacheNames = CacheNames.PUBLISHED_ARTICLES,
             key = "T(com.example.blog.cache.CacheKeys).pageKey(#pageable)",
@@ -126,7 +132,7 @@ public class ArticleService {
     }
 
     public Page<ArticleDTO> searchArticles(String keyword, Pageable pageable) {
-        return articleRepository.searchByKeyword(keyword, pageable).map(ArticleDTO::fromEntityList);
+        return articleSearchService.search(keyword, pageable);
     }
 
     public Page<ArticleDTO> searchArticles(Article.Status status,
@@ -136,6 +142,10 @@ public class ArticleService {
                                            Pageable pageable) {
         Specification<Article> specification = ArticleSpecifications.withFilters(status, categoryId, tagId, keyword);
         return articleRepository.findAll(specification, pageable).map(ArticleDTO::fromEntityList);
+    }
+
+    public List<ArticleSuggestionDTO> suggestArticles(String keyword, int size) {
+        return articleSearchService.suggest(keyword, size);
     }
 
     @Transactional(readOnly = true)
@@ -202,6 +212,7 @@ public class ArticleService {
         }
 
         articleRepository.save(article);
+        eventPublisher.publishEvent(ArticleIndexEvent.upsert(article.getId()));
         return ArticleDTO.fromEntity(article);
     }
 
@@ -253,6 +264,7 @@ public class ArticleService {
         }
 
         articleRepository.save(article);
+        eventPublisher.publishEvent(ArticleIndexEvent.upsert(article.getId()));
         return ArticleDTO.fromEntity(article);
     }
 
@@ -275,6 +287,7 @@ public class ArticleService {
         }
 
         articleRepository.delete(article);
+        eventPublisher.publishEvent(ArticleIndexEvent.delete(article.getId()));
     }
 
     @Transactional

@@ -24,6 +24,9 @@ public class ArticleDTO {
     private Integer viewCount;
     private Integer likeCount;
     private Boolean liked;
+    private String highlightTitle;
+    private String highlightSummary;
+    private String highlightContent;
     private LocalDateTime publishedAt;
     private AuthorInfo author;
     private CategoryDTO category;
